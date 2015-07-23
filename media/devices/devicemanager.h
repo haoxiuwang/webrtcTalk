@@ -94,7 +94,7 @@ class DeviceManagerInterface {
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& usb_id) = 0;
 
   // Device creation
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const = 0;
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device, bool isScreenCast) const = 0;
 
   virtual bool GetWindows(
       std::vector<rtc::WindowDescription>* descriptions) = 0;
@@ -161,7 +161,7 @@ class DeviceManager : public DeviceManagerInterface {
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& usb_id);
 
   // TODO(pthatcher): Rename to CreateVideoDeviceCapturer.
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const;
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device, bool isScreenCast) const;
 
   virtual bool GetWindows(
       std::vector<rtc::WindowDescription>* descriptions);

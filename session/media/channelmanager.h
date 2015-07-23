@@ -165,7 +165,7 @@ class ChannelManager : public rtc::MessageHandler,
   // Gets the current capture Device.
   bool GetVideoCaptureDevice(Device* device);
   // Create capturer based on what has been set in SetCaptureDevice().
-  VideoCapturer* CreateVideoCapturer();
+  VideoCapturer* CreateVideoCapturer(bool isScreenCast);
   // Create capturer from a screen.
   VideoCapturer* CreateScreenCapturer(const ScreencastId& screenid);
   bool SetCaptureDevice(const std::string& cam_device);

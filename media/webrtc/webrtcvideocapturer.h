@@ -47,8 +47,10 @@ namespace cricket {
 class WebRtcVcmFactoryInterface {
  public:
   virtual ~WebRtcVcmFactoryInterface() {}
+//edited
   virtual webrtc::VideoCaptureModule* Create(
-      int id, const char* device) = 0;
+      int id, const char* device, bool isScreenCast) = 0;
+
   virtual webrtc::VideoCaptureModule::DeviceInfo* CreateDeviceInfo(int id) = 0;
   virtual void DestroyDeviceInfo(
       webrtc::VideoCaptureModule::DeviceInfo* info) = 0;
@@ -62,7 +64,8 @@ class WebRtcVideoCapturer : public VideoCapturer,
   explicit WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory);
   virtual ~WebRtcVideoCapturer();
 
-  bool Init(const Device& device);
+  //edited
+  bool Init(const Device& device, bool IsScreencast);
   bool Init(webrtc::VideoCaptureModule* module);
 
   // Override virtual methods of the parent class VideoCapturer.
@@ -71,7 +74,7 @@ class WebRtcVideoCapturer : public VideoCapturer,
   virtual CaptureState Start(const VideoFormat& capture_format);
   virtual void Stop();
   virtual bool IsRunning();
-  virtual bool IsScreencast() const { return false; }
+  virtual bool IsScreencast() const { return this->is_screen_cast_; }
   virtual bool SetApplyRotation(bool enable);
 
  protected:
@@ -98,6 +101,8 @@ class WebRtcVideoCapturer : public VideoCapturer,
   int captured_frames_;
   std::vector<uint8_t> capture_buffer_;
   rtc::Thread* start_thread_;  // Set in Start(), unset in Stop();
+  //edited
+  bool is_screen_cast_;
 
   // Critical section to avoid Stop during an OnIncomingCapturedFrame callback.
   rtc::CriticalSection critical_section_stopping_;

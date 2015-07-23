@@ -68,8 +68,9 @@ static kVideoFourCCEntry kSupportedFourCCs[] = {
 
 class WebRtcVcmFactory : public WebRtcVcmFactoryInterface {
  public:
-  virtual webrtc::VideoCaptureModule* Create(int id, const char* device) {
-    return webrtc::VideoCaptureFactory::Create(id, device);
+	 //edited
+  virtual webrtc::VideoCaptureModule* Create(int id, const char* device, bool isScreenCast) {
+    return webrtc::VideoCaptureFactory::Create(id, device, isScreenCast);
   }
   virtual webrtc::VideoCaptureModule::DeviceInfo* CreateDeviceInfo(int id) {
     return webrtc::VideoCaptureFactory::CreateDeviceInfo(id);
@@ -138,7 +139,8 @@ WebRtcVideoCapturer::WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory)
     : factory_(factory),
       module_(NULL),
       captured_frames_(0),
-      start_thread_(nullptr) {
+      start_thread_(nullptr),
+	  is_screen_cast_(false){
   set_frame_factory(new WebRtcVideoFrameFactory());
 }
 
@@ -148,8 +150,12 @@ WebRtcVideoCapturer::~WebRtcVideoCapturer() {
   }
 }
 
-bool WebRtcVideoCapturer::Init(const Device& device) {
+//edited
+bool WebRtcVideoCapturer::Init(const Device& device, bool IsScreencast) {
   DCHECK(!start_thread_);
+
+  this->is_screen_cast_ = isScreenCast;
+
   if (module_) {
     LOG(LS_ERROR) << "The capturer is already initialized";
     return false;
@@ -176,7 +182,7 @@ bool WebRtcVideoCapturer::Init(const Device& device) {
       }
     }
   }
-  if (!found) {
+  if (!isScreenCast && !found) {
     LOG(LS_WARNING) << "Failed to find capturer for id: " << device.id;
     factory_->DestroyDeviceInfo(info);
     return false;
@@ -184,59 +190,56 @@ bool WebRtcVideoCapturer::Init(const Device& device) {
 
   // Enumerate the supported formats.
   // TODO(juberti): Find out why this starts/stops the camera...
-
   std::vector<VideoFormat> supported;
- 
- int32_t num_caps = info->NumberOfCapabilities(vcm_id);
-  for (int32_t i = 0; i < num_caps; ++i) {
-    webrtc::VideoCaptureCapability cap;
-    if (info->GetCapability(vcm_id, i, cap) != -1) {
-      VideoFormat format;
-      if (CapabilityToFormat(cap, &format)) {
-        supported.push_back(format);
-      } else {
-        LOG(LS_WARNING) << "Ignoring unsupported WebRTC capture format "
-                        << cap.rawType;
-      }
-    }
-  } 
 
-/*
-    webrtc::RawVideoType webrtc_type = webrtc::kVideoYUY2;
-    webrtc::VideoCaptureCapability cap;
+  if(!IsScreencast)
+  {
+#if defined(WEBRTC_MAC)
+	  webrtc::RawVideoType webrtc_type = webrtc::kVideoYUY2;
+	  webrtc::VideoCaptureCapability cap;
 
-                        cap.width = 700;
-			cap.height = 500;
-			cap.maxFPS = 30;
-			cap.expectedCaptureDelay = 120;
-			cap.rawType = webrtc_type; 
-   
-	
-      VideoFormat format;
-      if (CapabilityToFormat(cap, &format)) {
-        supported.push_back(format);
-      } else {
-        LOG(LS_WARNING) << "Ignoring unsupported WebRTC capture format "
-                        << cap.rawType;
-      } edited */
+	  cap.width = 700;
+	  cap.height = 500;
+	  cap.maxFPS = 30;
+	  cap.expectedCaptureDelay = 120;
+	  cap.rawType = webrtc_type; 
+
+	  VideoFormat format;
+	  if (CapabilityToFormat(cap, &format)) {
+		  supported.push_back(format);
+	  } else {
+		  LOG(LS_WARNING) << "Ignoring unsupported WebRTC capture format "
+			  << cap.rawType;
+	  } 
+#else
+	  int32_t num_caps = info->NumberOfCapabilities(vcm_id);
+	  for (int32_t i = 0; i < num_caps; ++i) {
+		  webrtc::VideoCaptureCapability cap;
+		  if (info->GetCapability(vcm_id, i, cap) != -1) {
+			  VideoFormat format;
+			  if (CapabilityToFormat(cap, &format)) {
+				  supported.push_back(format);
+			  } else {
+				  LOG(LS_WARNING) << "Ignoring unsupported WebRTC capture format "
+					  << cap.rawType;
+			  }
+		  }
+	  } 
+#endif
+  }
 
   factory_->DestroyDeviceInfo(info);
-// TODO(fischman): Remove the following check
-// when capabilities for iOS are implemented
-// https://code.google.com/p/webrtc/issues/detail?id=2968
-
-
 
 #if !defined(IOS)
-  if (supported.empty()) {
+  if (!isScreenCast && supported.empty()) {
     LOG(LS_ERROR) << "Failed to find usable formats for id: " << device.id;
     return false;
   }
 #endif
 
-LOG(LS_WARNING) << "id: " << device.id << "  vcm_id: " << vcm_id;
+  //edited
+  module_ = factory_->Create(0, vcm_id, IsScreencast);
 
-  module_ = factory_->Create(0, vcm_id);
   if (!module_) {
     LOG(LS_ERROR) << "Failed to create capturer for id: " << device.id;
     return false;
@@ -396,7 +399,11 @@ void WebRtcVideoCapturer::OnIncomingCapturedFrame(const int32_t id,
   // avoid a potential deadlock. Besides, if we can't enter because we're
   // stopping, we may as well drop the frame.
   rtc::TryCritScope cs(&critical_section_stopping_);
-  if (!cs.locked() || !IsRunning()) {
+
+  //if (!cs.locked() || !IsRunning()) {
+
+
+  if (!cs.locked()) {
     // Capturer has been stopped or is in the process of stopping.
     return;
   }

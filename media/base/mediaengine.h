@@ -47,9 +47,8 @@
 #include "talk/media/devices/devicemanager.h"
 #include "webrtc/base/fileutils.h"
 #include "webrtc/base/sigslotrepeater.h"
-//WH
-#include "webrtc/libjingle/examples/call/PublicCallback.h"
 
+//edited
 #if defined(GOOGLE_CHROME_BUILD) || defined(CHROMIUM_BUILD)
 //#define DISABLE_MEDIA_ENGINE_FACTORY
 #endif

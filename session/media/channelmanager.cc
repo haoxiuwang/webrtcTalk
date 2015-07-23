@@ -737,22 +737,28 @@ bool ChannelManager::SetCaptureDevice(const std::string& cam_name) {
   return ret;
 }
 
-VideoCapturer* ChannelManager::CreateVideoCapturer() {
+//edited
+VideoCapturer* ChannelManager::CreateVideoCapturer(bool isScreenCast) {
   Device device;
- 
- 
 
 // edited 读取本地视频文件，模拟摄像头
   //if (!device_manager_->GetVideoCaptureDevice("/Users/wanghao/1.abc", &device)) 
 
-  if (!device_manager_->GetVideoCaptureDevice(camera_device_, &device)){
+  if (!isScreenCast && !device_manager_->GetVideoCaptureDevice(camera_device_, &device)){
     if (!camera_device_.empty()) {
       LOG(LS_WARNING) << "Device manager can't find camera: " << camera_device_;
     }
-LOG(LS_WARNING) << " can't find camera: ";
+	  LOG(LS_WARNING) << " can't find camera: ";
     return NULL;
   }
-  VideoCapturer* capturer = device_manager_->CreateVideoCapturer(device);
+
+  if(isScreenCast){
+	  device.id="ScreenCapture";
+	  device.name="ScreenCapture";
+  }
+
+  //edited
+  VideoCapturer* capturer = device_manager_->CreateVideoCapturer(device, isScreenCast);
   if (capturer && default_video_encoder_config_.max_codec.id != 0) {
     // For now, use the aspect ratio of the default_video_encoder_config_,
     // which may be different than the native aspect ratio of the start
@@ -761,8 +767,6 @@ LOG(LS_WARNING) << " can't find camera: ";
         default_video_encoder_config_.max_codec.width,
         default_video_encoder_config_.max_codec.height);
   }
-
-LOG(LS_INFO) << "ChannelManager return capturer";
 
   return capturer;
 }

@@ -35,26 +35,139 @@
 #ifdef WIN32
 #include "talk/media/base/videorenderer.h"
 #include "webrtc/base/scoped_ptr.h"
+#include "webrtc/base/thread.h"
+#include "webrtc/base/win32window.h"
 
 namespace cricket {
 
 class GdiVideoRenderer : public VideoRenderer {
- public:
-  GdiVideoRenderer(int x, int y);
-  virtual ~GdiVideoRenderer();
+	public:
+		GdiVideoRenderer(int x, int y);
+		virtual ~GdiVideoRenderer();
 
-  // Implementation of pure virtual methods of VideoRenderer.
-  // These two methods may be executed in different threads.
-  // SetSize is called before RenderFrame.
-  virtual bool SetSize(int width, int height, int reserved);
-  virtual bool RenderFrame(const VideoFrame* frame);
+		// Implementation of pure virtual methods of VideoRenderer.
+		// These two methods may be executed in different threads.
+		// SetSize is called before RenderFrame.
+		virtual bool SetSize(int width, int height, int reserved);
+		virtual bool RenderFrame(const VideoFrame* frame);
 
- private:
-  class VideoWindow;  // forward declaration, defined in the .cc file
-  rtc::scoped_ptr<VideoWindow> window_;
-  // The initial position of the window.
-  int initial_x_;
-  int initial_y_;
+	private:
+		rtc::scoped_ptr<VideoWindow> window_;
+		// The initial position of the window.
+		int initial_x_;
+		int initial_y_;
+};
+
+//edited
+class VideoWindow : public rtc::Win32Window {
+	public:
+		VideoWindow(int x, int y, int width, int height, bool local);
+		virtual ~VideoWindow();
+
+		// Called when the video size changes. If it is called the first time, we
+		// create and start the thread. Otherwise, we send kSetSizeMsg to the thread.
+		// Context: non-worker thread.
+		bool SetSize(int width, int height);
+
+		// Called when a new frame is available. Upon this call, we send
+		// kRenderFrameMsg to the window thread. Context: non-worker thread. It may be
+		// better to pass RGB bytes to VideoWindow. However, we pass VideoFrame to put
+		// all the thread synchronization within VideoWindow.
+		bool RenderFrame(const VideoFrame* frame);
+
+	protected:
+		// Override virtual method of rtc::Win32Window. Context: worker Thread.
+		virtual bool OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
+			LRESULT& result);
+
+	private:
+		enum { kSetSizeMsg = WM_USER, kRenderFrameMsg};
+
+		class WindowThread : public rtc::Thread {
+		public:
+			explicit WindowThread(VideoWindow* window) : window_(window) {}
+
+			virtual ~WindowThread() {
+				Stop();
+			}
+
+			// Override virtual method of rtc::Thread. Context: worker Thread.
+			virtual void Run() {
+				// Initialize the window
+				if (!window_ || !window_->Initialize()) {
+					return;
+				}
+				// Run the message loop
+				MSG msg;
+				while (GetMessage(&msg, NULL, 0, 0) > 0) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+			}
+
+		private:
+			VideoWindow* window_;
+		};
+
+		// Context: worker Thread.
+		bool Initialize();
+		void OnPaint();
+		void OnSize(int width, int height, bool frame_changed);
+		void OnRenderFrame(const VideoFrame* frame);
+
+		BITMAPINFO bmi_;
+		rtc::scoped_ptr<uint8[]> image_;
+		rtc::scoped_ptr<WindowThread> window_thread_;
+		// The initial position of the window.
+		int initial_x_;
+		int initial_y_;
+		int initial_width_;
+		int initial_height_;
+		bool _local;
+};
+
+class BabelVideoRenderer : public VideoRenderer {
+public:
+	BabelVideoRenderer(int x, int y,bool isRemote);
+	virtual ~BabelVideoRenderer();
+
+	// Implementation of pure virtual methods of VideoRenderer.
+	// These two methods may be executed in different threads.
+	// SetSize is called before RenderFrame.
+	virtual bool SetSize(int width, int height, int reserved);
+	virtual bool RenderFrame(const VideoFrame* frame);
+
+private:
+	//class VideoWindow;  // forward declaration, defined in the .cc file
+	//rtc::scoped_ptr<VideoWindow> window_;
+	//// The initial position of the window.
+	int initial_x_;
+	int initial_y_;
+	bool _local;
+	BITMAPINFO bmi_;
+	rtc::scoped_ptr<uint8[]> image_;
+
+};
+
+class Win32VideoRenderer : public VideoRenderer {
+public:
+	Win32VideoRenderer(int x, int y,bool isRemote);
+	virtual ~Win32VideoRenderer();
+
+	// Implementation of pure virtual methods of VideoRenderer.
+	// These two methods may be executed in different threads.
+	// SetSize is called before RenderFrame.
+	virtual bool SetSize(int width, int height, int reserved);
+	virtual bool RenderFrame(const VideoFrame* frame);
+
+private:
+	//class VideoWindow;  // forward declaration, defined in the .cc file
+	//rtc::scoped_ptr<VideoWindow> window_;
+	//// The initial position of the window.
+	bool _local;
+	BITMAPINFO bmi_;
+	rtc::scoped_ptr<uint8[]> image_;
+
 };
 
 }  // namespace cricket

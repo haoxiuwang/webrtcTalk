@@ -31,10 +31,10 @@
 
 namespace cricket {
 
-VideoCapturer* WebRtcVideoDeviceCapturerFactory::Create(const Device& device) {
-  rtc::scoped_ptr<WebRtcVideoCapturer> capturer(
-      new WebRtcVideoCapturer());
-  if (!capturer->Init(device)) {
+//edited
+VideoCapturer* WebRtcVideoDeviceCapturerFactory::Create(const Device& device, bool isScreenCast) {
+  rtc::scoped_ptr<WebRtcVideoCapturer> capturer(new WebRtcVideoCapturer());
+  if (!capturer->Init(device, isScreenCast)) {
     return NULL;
   }
   return capturer.release();

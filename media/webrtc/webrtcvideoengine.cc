@@ -3878,6 +3878,7 @@ int WebRtcVideoMediaChannel::GetRecvChannelId(uint32 ssrc) {
   return recv_channel_id;
 }
 
+//edited
 bool WebRtcVideoMediaChannel::SetSendParams(
     WebRtcVideoChannelSendInfo* send_channel,
     const VideoSendParams& send_params) {

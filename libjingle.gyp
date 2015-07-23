@@ -483,8 +483,8 @@
         'media/webrtc/webrtcvoe.h',
         'media/webrtc/webrtcvoiceengine.cc',
         'media/webrtc/webrtcvoiceengine.h',
-'media/devices/surrogatevideorenderer.h',
-'media/devices/surrogatevideorenderer.cc',
+        'media/devices/apprtcvideorenderer.h', # used by both mac and iOS platforms
+        'media/devices/apprtcvideorenderer.mm',
       ],
       'conditions': [
         ['build_with_chromium==1', {
@@ -547,6 +547,12 @@
             'media/devices/macdevicemanager.cc',
             'media/devices/macdevicemanager.h',
             'media/devices/macdevicemanagermm.mm',
+            'media/devices/macconsolevideorenderer.h',
+            'media/devices/macconsolevideorenderer.mm',
+            '<(webrtc_root)/modules/video_render/test/testAPI/CocoaRenderViewCreator.h',
+            '<(webrtc_root)/modules/video_render/test/testAPI/CocoaRenderViewCreator.mm',
+            'media/devices/macvideorenderer.h',
+            'media/devices/macvideorenderer.mm',
           ],
           'conditions': [
             ['target_arch=="ia32"', {
@@ -561,6 +567,14 @@
                   ],
                 },
               },
+            }],
+            ['OS=="mac" or OS=="linux"', {
+              'cflags': [
+                '-Wno-write-strings',
+              ],
+              'ldflags': [
+                '-lpthread -lm',
+              ],
             }],
           ],
           'xcode_settings': {
@@ -579,6 +593,7 @@
                 '-framework CoreVideo',
                 '-framework OpenGL',
                 '-framework QTKit',
+                '-framework Foundation -framework AppKit',
               ],
             },
           },
@@ -586,6 +601,8 @@
         ['OS=="ios"', {
           'sources': [
             'media/devices/mobiledevicemanager.cc',
+            'media/devices/iosvideorenderer.h',
+            'media/devices/iosvideorenderer.mm',
           ],
           'include_dirs': [
             # TODO(sjlee) Remove when vp8 is building for iOS.  vp8 pulls in
@@ -596,6 +613,8 @@
         ['OS=="android"', {
           'sources': [
             'media/devices/mobiledevicemanager.cc',
+			'media/devices/androidvideorenderer.h',
+            'media/devices/androidvideorenderer.cc',
           ],
         }],
       ],

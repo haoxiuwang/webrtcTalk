@@ -52,7 +52,7 @@
 */
 
 //WH
-#include "talk/media/devices/surrogatevideorenderer.h" //edited
+#include "talk/media/devices/androidvideorenderer.h" //edited
 
 namespace cricket {
 

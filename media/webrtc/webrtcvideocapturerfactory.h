@@ -36,7 +36,8 @@ namespace cricket {
 // Creates instances of cricket::WebRtcVideoCapturer.
 class WebRtcVideoDeviceCapturerFactory : public VideoDeviceCapturerFactory {
  public:
-  virtual VideoCapturer* Create(const Device& device);
+	 //edited
+  virtual VideoCapturer* Create(const Device& device, bool isScreenCast);
 };
 
 }  // namespace cricket

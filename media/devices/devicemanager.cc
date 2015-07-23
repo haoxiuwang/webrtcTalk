@@ -189,7 +189,8 @@ void DeviceManager::ClearVideoCaptureDeviceMaxFormat(
   max_formats_.erase(usb_id);
 }
 
-VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device) const {
+//edited
+VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device, bool isScreenCast) const {
   VideoCapturer* capturer = MaybeConstructFakeVideoCapturer(device);
   if (capturer) {
     return capturer;
@@ -199,7 +200,9 @@ VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device) const {
     LOG(LS_ERROR) << "No video capturer factory for devices.";
     return NULL;
   }
-  capturer = video_device_capturer_factory_->Create(device);
+
+  //edited
+  capturer = video_device_capturer_factory_->Create(device, isScreenCast);
   if (!capturer) {
     return NULL;
   }

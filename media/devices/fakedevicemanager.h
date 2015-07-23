@@ -102,7 +102,7 @@ class FakeDeviceManager : public DeviceManagerInterface {
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& usb_id) {
     max_formats_.erase(usb_id);
   }
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const {
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device, bool isScreenCast) const {
     return new FakeVideoCapturer();
   }
   virtual VideoCapturer* CreateScreenCapturer(

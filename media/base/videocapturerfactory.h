@@ -40,7 +40,8 @@ class VideoDeviceCapturerFactory {
   VideoDeviceCapturerFactory() {}
   virtual ~VideoDeviceCapturerFactory() {}
 
-  virtual VideoCapturer* Create(const Device& device) = 0;
+  //edited
+  virtual VideoCapturer* Create(const Device& device, bool isScreenCast) = 0;
 };
 
 class ScreenCapturerFactory {
