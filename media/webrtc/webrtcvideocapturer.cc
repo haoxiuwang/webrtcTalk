@@ -151,7 +151,7 @@ WebRtcVideoCapturer::~WebRtcVideoCapturer() {
 }
 
 //edited
-bool WebRtcVideoCapturer::Init(const Device& device, bool IsScreencast) {
+bool WebRtcVideoCapturer::Init(const Device& device, bool isScreenCast) {
   DCHECK(!start_thread_);
 
   this->is_screen_cast_ = isScreenCast;
@@ -192,7 +192,7 @@ bool WebRtcVideoCapturer::Init(const Device& device, bool IsScreencast) {
   // TODO(juberti): Find out why this starts/stops the camera...
   std::vector<VideoFormat> supported;
 
-  if(!IsScreencast)
+  if(!isScreenCast)
   {
 #if defined(WEBRTC_MAC)
 	  webrtc::RawVideoType webrtc_type = webrtc::kVideoYUY2;
@@ -238,7 +238,7 @@ bool WebRtcVideoCapturer::Init(const Device& device, bool IsScreencast) {
 #endif
 
   //edited
-  module_ = factory_->Create(0, vcm_id, IsScreencast);
+  module_ = factory_->Create(0, vcm_id, isScreenCast);
 
   if (!module_) {
     LOG(LS_ERROR) << "Failed to create capturer for id: " << device.id;
