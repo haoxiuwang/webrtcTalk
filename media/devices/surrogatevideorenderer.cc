@@ -3,7 +3,7 @@
 #include "talk/media/devices/surrogatevideorenderer.h"
 //WH
 #include "webrtc/libjingle/examples/call/PublicCallback.h"
-#include "webrtc/modules/utility/interface/helpers_android.h"
+//#include "webrtc/modules/utility/interface/helpers_android.h"
 
 using namespace webrtc;
 
