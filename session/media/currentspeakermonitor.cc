@@ -195,7 +195,6 @@ void CurrentSpeakerMonitor::OnAudioMonitor(
 void CurrentSpeakerMonitor::OnMediaStreamsUpdate(
     AudioSourceContext* audio_source_context, BaseSession* session,
     const MediaStreams& added, const MediaStreams& removed) {
-
   if (audio_source_context == audio_source_context_ && session == session_) {
     // Update the speaking state map based on added and removed streams.
     for (std::vector<cricket::StreamParams>::const_iterator

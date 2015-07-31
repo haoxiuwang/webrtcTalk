@@ -45,6 +45,11 @@
 #include "webrtc/base/win32.h"  // Need this to #include the impl files.
 #include "webrtc/modules/video_capture/include/video_capture_factory.h"
 
+#if defined(ANDROID)
+#include "webrtc/libjingle/examples/call/talk_call_android.h"
+#endif
+
+
 namespace cricket {
 
 struct kVideoFourCCEntry {
@@ -238,7 +243,11 @@ bool WebRtcVideoCapturer::Init(const Device& device, bool isScreenCast) {
 #endif
 
   //edited
+#if defined(ANDROID)
+  module_ = factory_->Create(current_Camera, vcm_id, isScreenCast);
+#else
   module_ = factory_->Create(0, vcm_id, isScreenCast);
+#endif
 
   if (!module_) {
     LOG(LS_ERROR) << "Failed to create capturer for id: " << device.id;
